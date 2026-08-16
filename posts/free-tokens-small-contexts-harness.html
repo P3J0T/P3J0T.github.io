@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Local inference makes tokens cheap. Context, continuity, tooling and verification still need engineering.">
+  <title>Free Tokens, Small Contexts, and Why the Harness Matters</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header><div class="wrap"><nav><a class="brand" href="../index.html">P3J0T / notes</a><div class="navlinks"><a href="https://github.com/P3J0T">github</a></div></nav></div></header>
+<main><article class="wrap">
+  <div class="kicker">Awoki / local AI</div>
+  <h1>Free Tokens, Small Contexts, and Why the Harness Matters</h1>
+  <p class="meta">17 Aug 2026</p>
+  <p class="lede">Self-hosting changes the economics of using a model. It does not magically fix the model.</p>
+
+  <p>I have been working on Awoki, a harness for long-running software and security investigations. The project grew out of a fairly simple problem: even when a model is good enough to be useful, a long investigation tends to expose everything around the model that is not.</p>
+
+  <p>Context gets compacted. Earlier evidence loses its meaning. Search results get promoted into facts. A repository changes while old conclusions are still being cited. A hypothesis slowly becomes a finding because nobody explicitly marked the transition.</p>
+
+  <p>Those are easy problems to call “model limitations”. Some of them are. But many are also system-design problems.</p>
+
+  <h2>“Free” tokens change the bottleneck</h2>
+
+  <p>With an API, every exploratory branch has a visible price. With a model running on hardware you already own, the marginal cost of another few thousand tokens can feel close to zero. Obviously the hardware, electricity, time and maintenance are not free. Hence the quotes.</p>
+
+  <p>But the change in behaviour is real. You can search more, retry more, ask the model to inspect another file, run another pass, or follow a weak lead without watching a token meter.</p>
+
+  <p>Then another resource becomes much more obvious: <strong>context</strong>.</p>
+
+  <p>You can have effectively abundant generation and still have a finite working memory. Even models advertising very large context windows do not make every token equally useful, and local deployments often run at smaller practical contexts because memory and latency matter.</p>
+
+  <blockquote>Cheap tokens are not the same thing as durable memory.</blockquote>
+
+  <h2>The harness is part of the intelligence</h2>
+
+  <p>There is a tendency to evaluate an AI system as if the model were the whole product. I think that becomes less useful as soon as you start doing real work with it.</p>
+
+  <p>A model has shortcomings. Short context. Weak tool discipline. Inconsistent persistence. Bad retrieval choices. Formatting quirks. Long-horizon drift. Sometimes excessive confidence. Sometimes excessive refusal.</p>
+
+  <p>The obvious response is to wait for a better model. Another response is to ask a different question:</p>
+
+  <blockquote>How much of a model's weakness can be moved out of the model and fixed by the harness?</blockquote>
+
+  <p>If the model forgets which repository it is investigating, software can store that. If it cannot reliably carry an entire investigation through compaction, durable state can carry the useful parts. If semantic retrieval finds something that merely looks relevant, the harness can force the workflow back to exact source before treating it as evidence.</p>
+
+  <p>This is one of the ideas behind Awoki. Model context is temporary working memory. Project state should not be.</p>
+
+  <pre><code>retrieval     -> discovery
+source        -> evidence
+model         -> reasoning
+verification  -> stronger claims
+continuity    -> survival across context loss</code></pre>
+
+  <p>None of this makes the model smarter in the benchmark sense. It can still make the combined system substantially more useful.</p>
+
+  <h2>Fix model shortcomings, but do not build a cathedral around them</h2>
+
+  <p>There is an obvious failure mode here too. Once you start compensating for model behaviour, it is easy to build layers of orchestration for problems that do not really exist, or for problems the next model release already handles better.</p>
+
+  <p>That is why the current Awoki work is mostly stabilization and usefulness testing rather than feature expansion. If a mechanism does not help a realistic investigation, I would rather simplify it or remove it.</p>
+
+  <blockquote>Do not spend model intelligence on deterministic problems. Do not spend software complexity on imaginary model problems either.</blockquote>
+
+  <p>That balance is more interesting to me than trying to build a giant agent framework.</p>
+
+  <h2>Local models are getting good enough for this to matter</h2>
+
+  <p>Qwen3.6-27B is a good current example. Qwen released the open-weight 27B dense model in April 2026, with a focus on coding, repository-level reasoning and agentic use. It is still a 27B model, which puts it in a very different self-hosting category from the enormous frontier models.</p>
+
+  <p>That does not mean “27B is all you need”. It means the floor keeps moving. Models that an individual, researcher or small team can plausibly operate are becoming capable enough that the quality of the surrounding system starts to matter a lot.</p>
+
+  <p>The model is also replaceable. Awoki is not a Qwen runtime and is not tied to one provider. That is intentional. If a better model appears next month, continuity, source provenance, retrieval boundaries and verification do not suddenly become useless.</p>
+
+  <h2>Security has another reason to care about local control</h2>
+
+  <p>Security research is a strange workload for general-purpose assistants because understanding dangerous behaviour is often literally the job.</p>
+
+  <p>Reverse engineering, exploit analysis, malware research, protocol work and red-team exercises routinely require discussing techniques that look suspicious when stripped of authorization and context. Hosted systems have to make policy decisions for a huge population of users, so legitimate specialist work can sometimes hit those boundaries.</p>
+
+  <p>Locally hosted, less-restrictively aligned or community “uncensored” models can be useful here—not because “anything goes” is a good security model, but because the operator controls the environment and the policy boundary.</p>
+
+  <p>I would rather think about controls at several layers:</p>
+
+  <pre><code>model        -> reasoning engine
+harness      -> state, tools, evidence, workflow constraints
+environment  -> isolation, permissions, network boundaries
+human        -> authorization, scope, judgement</code></pre>
+
+  <p>Removing a remote refusal layer does not require removing every other control. For professional red-team and reverse-engineering workflows, moving some control closer to the operator can actually make the boundaries more explicit.</p>
+
+  <h2>Awoki is an experiment in that direction</h2>
+
+  <p>Awoki is not “memory for AI”, and it is not an autonomous security researcher. It is a Docker-first harness around OpenCode for long-running, evidence-backed software and security work.</p>
+
+  <p>The user still drives the investigation. Retrieval helps discover code; exact source remains authoritative. Important observations can be promoted into durable state. Claims can retain provenance. Compaction can restore a bounded working set instead of pretending the chat transcript is a database.</p>
+
+  <p>The project has become less about adding clever mechanisms and more about finding which ones actually earn their complexity.</p>
+
+  <p>That is also why self-hosting is interesting here. If tokens become cheap enough to use freely, we can spend them on exploration. If context remains constrained, the harness has to decide what deserves to survive. If the model has rough edges, we can sometimes engineer around them. If the harness becomes more complicated than the problem, we can delete parts of it.</p>
+
+  <h2>Building in the age of AI</h2>
+
+  <p>I do not think the interesting end state is everybody talking to one giant general-purpose model.</p>
+
+  <p>I expect a lot of the useful work to look more like systems built out of models: security workflows, coding environments, research tools, personal knowledge systems, automation pipelines, operations tooling, domain-specific assistants, and things we do not have good names for yet.</p>
+
+  <p>The model will matter. So will the harness, tools, state, data, permissions, verification and the human workflow around it.</p>
+
+  <p>And once these systems can call tools, hold credentials, write code, reach networks, keep state and act over time, <strong>secure AI agent infrastructure becomes part of the problem.</strong> I think zero-trust ideas fit naturally here: do not trust a tool call just because the model asked for it, and do not trust an agent just because it is running locally.</p>
+
+  <p>Capabilities should be explicit and scoped. Credentials should be limited. Network access should have boundaries. Risky actions should cross stronger verification or human-approval gates. State and evidence should have provenance. The model can be treated as a useful but untrusted workload inside a system that decides what it is actually allowed to touch.</p>
+
+  <div class="callout">
+    <strong>Local does not mean trusted.</strong><br>
+    Model → untrusted reasoning<br>
+    Harness → capability boundary<br>
+    Environment → isolation + least privilege<br>
+    Human → authority for consequential actions
+  </div>
+
+  <p>For me, that is another part of “building with AI”: not only making agents more capable, but building infrastructure where capability does not automatically imply authority.</p>
+
+  <blockquote>We are not only entering the age of AI models. We are entering the age of building with AI.</blockquote>
+
+  <p>Different models. Different constraints. Different harnesses. Different jobs.</p>
+
+  <p>The question I find more interesting than “which model wins?” is: <strong>what can we build once models are components?</strong></p>
+
+  <hr>
+  <p class="muted">Awoki is an ongoing project. This post describes the ideas behind the approach, not a claim that the problems above are solved.</p>
+</article></main>
+<footer><div class="wrap"><a href="../index.html">← all notes</a></div></footer>
+</body>
+</html>

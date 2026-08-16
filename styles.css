@@ -1,0 +1,53 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #11151a;
+  --text: #e7e9ec;
+  --muted: #9aa4af;
+  --line: #262d35;
+  --accent: #d8ff66;
+  --code: #151a20;
+  --max: 760px;
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.72 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { width: min(calc(100% - 36px), var(--max)); margin: 0 auto; }
+header { padding: 42px 0 28px; border-bottom: 1px solid var(--line); }
+nav { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+.brand { font-weight: 700; color: var(--text); letter-spacing: .02em; }
+.navlinks { display: flex; gap: 18px; font-size: 14px; }
+main { padding: 58px 0 88px; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -.025em; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.65rem); margin: 0 0 18px; }
+h2 { font-size: 1.55rem; margin: 48px 0 12px; }
+h3 { font-size: 1.1rem; margin-top: 34px; }
+p { margin: 0 0 1.35em; }
+.lede { font-size: 1.15rem; color: #cfd5da; }
+.meta, .muted { color: var(--muted); font-size: 14px; }
+.kicker { color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: .11em; margin-bottom: 15px; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+blockquote { margin: 32px 0; padding: 3px 0 3px 22px; border-left: 3px solid var(--accent); color: #d9dee3; font-size: 1.07rem; }
+pre, code { font-family: inherit; }
+code { background: var(--code); padding: .12em .35em; border-radius: 4px; font-size: .92em; }
+pre { overflow-x: auto; background: var(--code); border: 1px solid var(--line); padding: 18px; border-radius: 8px; line-height: 1.55; }
+pre code { padding: 0; background: transparent; }
+.post-list { list-style: none; padding: 0; margin: 42px 0 0; }
+.post-list li { padding: 24px 0; border-top: 1px solid var(--line); }
+.post-list a { display: block; color: var(--text); font-weight: 700; font-size: 1.08rem; margin-bottom: 6px; }
+.tag { display: inline-block; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 2px 8px; font-size: 12px; margin-right: 6px; }
+footer { border-top: 1px solid var(--line); color: var(--muted); padding: 28px 0 48px; font-size: 13px; }
+strong { color: #fff; }
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  header { padding-top: 28px; }
+  main { padding-top: 42px; }
+  .navlinks { gap: 12px; }
+}
