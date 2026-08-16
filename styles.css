@@ -51,3 +51,45 @@ strong { color: #fff; }
   main { padding-top: 42px; }
   .navlinks { gap: 12px; }
 }
+
+.intro { margin-bottom: 64px; }
+.section-label {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.post-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+.post-card-link {
+  display: block;
+  padding: 28px;
+  color: var(--text);
+  text-decoration: none;
+}
+.post-card-link:hover { text-decoration: none; border-color: var(--accent); }
+.post-card h2 {
+  margin: 10px 0 12px;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+.post-card p { color: #cfd5da; margin-bottom: 20px; }
+.post-topline {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 13px;
+}
+.arrow { color: var(--accent); font-size: 18px; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.post-tags span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--muted);
+}

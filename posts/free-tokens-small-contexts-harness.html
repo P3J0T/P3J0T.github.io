@@ -67,7 +67,7 @@ continuity    -> survival across context loss</code></pre>
 
   <h2>Local models are getting good enough for this to matter</h2>
 
-  <p>Qwen3.6-27B is a good current example. Qwen released the open-weight 27B dense model in April 2026, with a focus on coding, repository-level reasoning and agentic use. It is still a 27B model, which puts it in a very different self-hosting category from the enormous frontier models.</p>
+  <p>Recent Qwen 27B-class releases are a good example of how quickly this space is moving. Capable open-weight models in this size range are arriving fast enough that a specific version number can become stale almost immediately. The important part is the direction: models that are realistic to run on serious local hardware keep getting better at coding, repository work, tool use and general reasoning.</p>
 
   <p>That does not mean “27B is all you need”. It means the floor keeps moving. Models that an individual, researcher or small team can plausibly operate are becoming capable enough that the quality of the surrounding system starts to matter a lot.</p>
 
@@ -107,20 +107,6 @@ human        -> authorization, scope, judgement</code></pre>
   <p>I expect a lot of the useful work to look more like systems built out of models: security workflows, coding environments, research tools, personal knowledge systems, automation pipelines, operations tooling, domain-specific assistants, and things we do not have good names for yet.</p>
 
   <p>The model will matter. So will the harness, tools, state, data, permissions, verification and the human workflow around it.</p>
-
-  <p>And once these systems can call tools, hold credentials, write code, reach networks, keep state and act over time, <strong>secure AI agent infrastructure becomes part of the problem.</strong> I think zero-trust ideas fit naturally here: do not trust a tool call just because the model asked for it, and do not trust an agent just because it is running locally.</p>
-
-  <p>Capabilities should be explicit and scoped. Credentials should be limited. Network access should have boundaries. Risky actions should cross stronger verification or human-approval gates. State and evidence should have provenance. The model can be treated as a useful but untrusted workload inside a system that decides what it is actually allowed to touch.</p>
-
-  <div class="callout">
-    <strong>Local does not mean trusted.</strong><br>
-    Model → untrusted reasoning<br>
-    Harness → capability boundary<br>
-    Environment → isolation + least privilege<br>
-    Human → authority for consequential actions
-  </div>
-
-  <p>For me, that is another part of “building with AI”: not only making agents more capable, but building infrastructure where capability does not automatically imply authority.</p>
 
   <blockquote>We are not only entering the age of AI models. We are entering the age of building with AI.</blockquote>
 

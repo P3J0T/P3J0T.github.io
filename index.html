@@ -3,23 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Notes on self-hosted AI, security research, model limitations, and the systems around them.">
-  <title>P3J0T / notes</title>
+  <meta name="description" content="Field notes on security, software, self-hosting, AI systems, reverse engineering, and the infrastructure around them.">
+  <title>P3J0T / field notes</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header><div class="wrap"><nav><a class="brand" href="./">P3J0T / notes</a><div class="navlinks"><a href="https://github.com/P3J0T">github</a></div></nav></div></header>
-<main><div class="wrap">
-  <div class="kicker">self-hosting · security · AI systems</div>
-  <h1>Building around the model.</h1>
-  <p class="lede">Notes from experiments with local inference, long-running software and security investigations, and the harnesses that make imperfect models more useful.</p>
-  <ul class="post-list">
-    <li>
-      <a href="posts/free-tokens-small-contexts-harness.html">Free Tokens, Small Contexts, and the Harness Around the Model</a>
-      <div class="meta">17 Aug 2026 · Awoki, local models, context, security · contains one Ewok</div>
-    </li>
-  </ul>
-</div></main>
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./">P3J0T / field notes</a>
+      <div class="navlinks"><a href="https://github.com/P3J0T">github</a></div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="intro">
+      <div class="kicker">security · systems · software · self-hosting · AI</div>
+      <h1>Building, breaking, and figuring things out.</h1>
+      <p class="lede">Field notes from security work, software, reverse engineering, local infrastructure, AI systems, and whatever else turns out to be interesting enough to pull apart.</p>
+    </section>
+
+    <section class="writing" aria-labelledby="writing-title">
+      <div class="section-label" id="writing-title">Latest writing</div>
+
+      <article class="post-card">
+        <a class="post-card-link" href="posts/free-tokens-small-contexts-harness.html">
+          <div class="post-topline">
+            <span>17 Aug 2026</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </div>
+          <h2>Free Tokens, Small Contexts, and Why the Harness Matters</h2>
+          <p>Local inference changes the economics. Context is still finite. Some model shortcomings are really system problems — and the harness is where a lot of the useful work starts.</p>
+          <div class="post-tags" aria-label="Topics">
+            <span>awoki</span><span>local AI</span><span>security</span><span>agent infra</span><span>+ one Ewok</span>
+          </div>
+        </a>
+      </article>
+    </section>
+  </div>
+</main>
+
 <footer><div class="wrap">Experiments, not promises.</div></footer>
 </body>
 </html>
