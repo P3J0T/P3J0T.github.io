@@ -108,6 +108,20 @@ human        -> authorization, scope, judgement</code></pre>
 
   <p>The model will matter. So will the harness, tools, state, data, permissions, verification and the human workflow around it.</p>
 
+  <p>And once these systems can call tools, hold credentials, write code, reach networks, keep state and act over time, <strong>secure AI agent infrastructure becomes part of the problem.</strong> Zero trust fits naturally here: the model should not inherit trust just because it is local, and a tool call should not inherit authority just because the model asked for it.</p>
+
+  <p>Capabilities should be explicit and scoped. Credentials should be limited. Network access should have boundaries. Risky actions should cross stronger verification or human-approval gates. State and evidence should retain provenance. The model can be treated as a useful but untrusted workload inside infrastructure that decides what it is actually allowed to touch.</p>
+
+  <div class="callout">
+    <strong>Local does not mean trusted.</strong><br>
+    Model → untrusted reasoning<br>
+    Harness → capability boundary<br>
+    Environment → isolation + least privilege<br>
+    Human → authority for consequential actions
+  </div>
+
+  <p>For me, that is another part of building with AI: not only making agents more capable, but building infrastructure where capability does not automatically imply authority.</p>
+
   <blockquote>We are not only entering the age of AI models. We are entering the age of building with AI.</blockquote>
 
   <p>Different models. Different constraints. Different harnesses. Different jobs.</p>
