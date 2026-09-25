@@ -155,13 +155,14 @@ end the loop. Dropping that qualification changed the claim. In a later retry ru
 the model saved revised notes but left their evidence and caveat fields empty.
 The <a href="empty-post-misleading-note-evidence.html#continuity-follow-up">continuity follow-up</a>
 records those separate cases.</p>
-<p>On returning to a note, there are two useful things to check: does the saved title
-still agree with the source condition, and did a correction actually reach the
-stored note? Reading the replacement back is a way to check that. Merely reopening
-the source had already left a contradiction untouched.</p>
-<p>For the empty POST, the detail worth carrying forward is the order of two events:
-the body was cleared, then the callback restored the method. Lose that order,
-and the explanation becomes as confusing as the original behavior.</p>
+<h2 id="lessons-learned">Lessons learned</h2>
+<ul>
+<li><strong>Getting the answer right doesn’t guarantee a useful memory.</strong> Qwen explained the behavior correctly, then saved a title that contradicted it. The note deserved its own review.</li>
+<li><strong>A citation can be valid while the claim is wrong.</strong> Reopening the right source didn’t automatically repair the conclusion attached to it.</li>
+<li><strong>Small details carry the explanation.</strong> POST versus PUT, “up to” versus “exactly,” and whether the body was cleared before the callback—all changed what the conclusion meant.</li>
+<li><strong>An empty graph result leaves a question open.</strong> Joern found no replay path for the selected query, while the runtime check showed the body being replayed.</li>
+<li><strong>Corrections need to survive in the stored record.</strong> A better chat answer can leave an old mistake behind. The replacement note needs checking too, including its evidence and caveats.</li>
+</ul>
 <p><em>The <a href="empty-post-misleading-note-evidence.html">evidence companion</a> contains the source
 versions, setup, full results and limits.</em></p>
 </article></main>
