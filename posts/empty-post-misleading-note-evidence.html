@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sources, runtime checks, Qwen trial results and limitations behind An Empty POST and a Misleading Note.">
+  <title>Evidence companion: request bodies and saved explanations</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .table-scroll { overflow-x: auto; margin: 1.6rem 0; }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: .85rem; line-height: 1.55; }
+    .table-wide table { min-width: 1050px; }
+    th, td { padding: .65rem .8rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<header><div class="wrap"><nav><a class="brand" href="../index.html">P3J0T / field notes</a><div class="navlinks"><a href="https://github.com/P3J0T">github</a></div></nav></div></header>
+<main><article class="wrap">
+  <div class="kicker">Supporting evidence</div>
+<h1 id="evidence-companion-request-bodies-and-saved-explanations">Evidence companion: request bodies and saved explanations</h1>
+<p><a href="empty-post-misleading-note.html">Read the article</a>.</p>
+<p>This companion summarizes the recorded methods and results behind the article.
+It is a curated evidence summary, not a raw trial archive or a complete
+reproduction package. The Axios investigation and the separate continuity
+exercise used different questions, tool configurations and response budgets;
+their results are reported separately. Source and runtime identities below
+specify the scope of the observations.</p>
+<h2 id="pinned-source-and-runtime">Pinned source and runtime</h2>
+<p>The Axios study used these unchanged sources:</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Pinned source and runtime table">
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Recorded identity</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Axios</td>
+<td><a href="https://github.com/axios/axios/tree/ed95c083f574e869bfe894866d95a01825f8ff4e"><code>ed95c083f574e869bfe894866d95a01825f8ff4e</code></a>, package version 1.20.0</td>
+<td>468 source-archive files</td>
+</tr>
+<tr>
+<td>follow-redirects</td>
+<td><a href="https://github.com/follow-redirects/follow-redirects/tree/0c23a223067201c368035e82954c11eb2578a33b"><code>0c23a223067201c368035e82954c11eb2578a33b</code></a>, tag v1.16.0</td>
+<td>23 source-archive files</td>
+</tr>
+<tr>
+<td>Awoki</td>
+<td>Frozen workspace of 239 individually hashed files</td>
+<td>Existing local Joern integration; no product edits during this study</td>
+</tr>
+<tr>
+<td>Joern</td>
+<td>4.0.627</td>
+<td>Graph of follow-redirects; no Axios or Node runtime internals</td>
+</tr>
+<tr>
+<td>Runtime oracle</td>
+<td>Node v22.23.2</td>
+<td>Node HTTP adapter, loopback HTTP/1, external networking disabled</td>
+</tr>
+</tbody></table>
+</div>
+<p>The Awoki per-file build manifest had SHA-256
+<code>05ae09853f621c6e9c633334b9d026c6cbf4d0a5011ed47f3b378216138fe545</code>.</p>
+<h2 id="eleven-runtime-checks">Eleven runtime checks</h2>
+<p>The evaluator ran these checks separately from Qwen. Each initial upload was
+fully consumed before the server returned a redirect. The body was the
+fourteen-byte text <code>hello redirect</code>; streamed cases produced two original
+chunks. All eleven assertions passed, and the counting request transform ran
+once in each case.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Eleven runtime checks table">
+<table>
+<thead>
+<tr>
+<th>Input and redirect</th>
+<th>Observed outcome</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Direct text POST</td>
+<td>POST with the full body</td>
+</tr>
+<tr>
+<td>Text POST, 303</td>
+<td>GET with an empty body</td>
+</tr>
+<tr>
+<td>Text POST, 307</td>
+<td>POST with the full body</td>
+</tr>
+<tr>
+<td>Stream POST, 307</td>
+<td>POST with the full body; only two original chunks produced</td>
+</tr>
+<tr>
+<td>Stream POST, 308</td>
+<td>POST with the full body; only two original chunks produced</td>
+</tr>
+<tr>
+<td>Stream POST, 302</td>
+<td>GET with an empty body</td>
+</tr>
+<tr>
+<td>Stream PUT, 302</td>
+<td>PUT with the full body</td>
+</tr>
+<tr>
+<td>Stream PUT, 303</td>
+<td>GET with an empty body</td>
+</tr>
+<tr>
+<td>Stream POST, 303; callback restores POST</td>
+<td>POST with an empty body</td>
+</tr>
+<tr>
+<td>Stream POST, 307 → 303 → 307</td>
+<td>Redirected hops: POST/full → GET/empty → GET/empty</td>
+</tr>
+<tr>
+<td>Stream POST, 303; <code>maxRedirects: 0</code></td>
+<td>One request, original 303 response, no callback</td>
+</tr>
+</tbody></table>
+</div>
+<p>The last case explicitly accepted 303 through <code>validateStatus</code>; default Axios
+status validation would reject it. These observations do not cover redirects
+received before upload completion, backpressure, large bodies, HTTP/2, browser
+adapters, custom transports or application-level retries. The complete upstream
+test suites were not run.</p>
+<h2 id="axios-trials">Axios trials</h2>
+<p>One composite question was repeated twice in each configuration. All arms had
+ordinary read/search tools. P used a plain checkpoint file; A added Awoki local
+retrieval, references and memory; R added embeddings, vector retrieval and
+reranking; J added bounded Joern queries against a prepared graph. Trial order
+was P1, A1, R1, J1, J2, R2, A2, P2.</p>
+<p>Each trial answered the initial question, underwent an explicit conversation
+summary, then received the same three false claims: 302 rewrites every method;
+changing the callback method restores the body; redirects rerun the request
+transform. Review also checked source inspection, saved notes, scope and recall
+of the deferred early-response question.</p>
+<div class="table-scroll table-wide" role="region" tabindex="0" aria-label="Axios trials table">
+<table>
+<thead>
+<tr>
+<th>Trial</th>
+<th>Correct core explanation</th>
+<th>Correctly rejected all three claims</th>
+<th>Deferred question recalled</th>
+<th>Full review passed</th>
+<th>Principal remaining issue</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P1</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>Missing dispatch inspection; misleading checkpoint implication</td>
+</tr>
+<tr>
+<td>A1</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Saved title contradicted the correct POST/PUT distinction</td>
+</tr>
+<tr>
+<td>R1</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Incomplete source route and mismatched claim/reference windows</td>
+</tr>
+<tr>
+<td>J1</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No flow query executed; saved note overstated a partial dependency result</td>
+</tr>
+<tr>
+<td>J2</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Incomplete source route and incorrect citations; flow result inconclusive</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Answer corrected a citation while the saved note retained the error</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Callback dispatcher omitted; status-handling claim insufficiently qualified</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>Actual upload pipe outside delivered excerpt; status-handling claim retained</td>
+</tr>
+</tbody></table>
+</div>
+<p>Thus the core explanation was correct in <strong>8/8</strong>, the deferred question was
+recalled in <strong>7/8</strong>, and the complete review passed in <strong>0/8</strong>. All eight completed
+both answers and the requested summary without reaching a deadline. Failure of
+the full review does not mean the main explanation was wrong.</p>
+<p>R1, R2, J1 and J2 demonstrably used embeddings, Qdrant and reranking: twelve
+successful search calls executed fifteen repository-specific retrieval passes.
+In J1, two invalid endpoint selections prevented flow execution. J2 repaired an
+invalid selection and executed one CALL-to-CALL flow query; it returned no paths,
+an inconclusive result. Neither live trial established the complete buffered
+replay route through a flow result.</p>
+<p>Separately, evaluator-selected Joern queries found a static candidate from the
+initial data parameter to the first write argument, but no path to the later
+replay argument. The missing path did not refute the observed runtime replay.
+These evaluator queries are not credited as model discoveries.</p>
+<h2 id="retrieval-and-source-check-details">Retrieval and source-check details</h2>
+<p>The evaluator-selected structural query <code>buffer request body redirect</code> returned
+the replay function second, the redirect handler fifth and the initial write
+method sixth. A <code>beforeRedirect</code> query ranked several test callbacks ahead of
+the production handler. These capability checks used the actual Awoki MCP server
+and Joern worker, separately from the live Qwen choices.</p>
+<p>The first live combined-retrieval redirect query ranked an Axios HTTP/2 helper
+first and the dependency&#39;s request wrapper second. Across both retrieval-enabled
+configurations, twelve successful searches executed fifteen repository-level
+embedding, vector and reranking operations. The cold build created 4,304 distinct
+vectors covering 5,330 indexed chunks and took about 32 minutes. Later retrieval
+trials reused those vectors and checked their own source membership. Setup cost
+is separate from answer generation; these timings do not establish a speed ranking.</p>
+<p>J1&#39;s backward-dependency query executed but reached its depth limit. J2 used 29
+recorded investigation steps and 41 tool calls before its initial answer; there
+was no fixed 24-step cutoff. All eight follow-ups completed. Seventeen saved
+source-window references matched current source bytes. That check establishes
+freshness, not the truth of the notes attached to them.</p>
+<h2 id="axios-methods-and-limits">Axios methods and limits</h2>
+<p>The configured model alias was <code>qwen3.8-27b-turbo</code>, with a 210,000-token context
+setting and a 4,096-token per-response output setting. Temperature was not
+explicitly fixed. Alias and configuration are not independent verification of
+the deployed weights or effective context capacity. Trials had a 25-minute
+phase allowance and no fixed 24-step ceiling. Setup was outside that allowance.</p>
+<p>The workflows were instructed: R/J had to attempt combined retrieval, and J had
+to attempt a selected flow trace. This does not measure spontaneous tool choice.
+The implementing assistant also designed the runtime checks and reviewed the
+answers; the Axios review was neither independent nor blinded.</p>
+<p>Before R1, setup was corrected to use a supported search mode and verified
+upstream Git metadata. P1/A1 used source archives without that metadata; all
+491 library files remained identical. P1/A1 also overlapped the initial vector
+build. These disclosed setup differences, reused caches and the small sample
+prevent a clean causal comparison or a controlled speed ranking. No model trial
+was rerun to replace an unfavorable answer.</p>
+<p>Source hashes and reference checks establish recorded source identity and
+binding, not whether every required passage was inspected or whether a claim is
+true. A valid reference can be attached to the wrong proposition. A completed
+tool call may return a rejection; a successfully saved note may still be wrong.</p>
+<h2 id="continuity-follow-up">Continuity follow-up</h2>
+<p>This work used queue and retry fixtures plus a separate Joern investigation,
+not the Axios question or its four-arm comparison. The model alias and configured
+context remained the same, but the per-response output setting was <strong>32,768</strong>
+tokens. The runner allowed 18 steps and 480 seconds per model phase, 240 seconds
+for explicit compaction, and a separate observed output-plus-reasoning stop of
+65,536 tokens per phase. The later results therefore cannot be pooled with the
+Axios trials as one accuracy score.</p>
+<p>The initial investigations and the recovery repeat used distinct frozen tool
+configurations. The software checks listed last did not include another model run.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="Continuity follow-up table">
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Completed work</th>
+<th>Full investigation outcome</th>
+<th>What it supports</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Initial investigations</td>
+<td>Queue, retry and Joern live investigations</td>
+<td>0/3 passed</td>
+<td>Real tool, memory and evidence operations worked; conclusions and saved qualifications still had material errors</td>
+</tr>
+<tr>
+<td>Recovery repeat</td>
+<td>Fresh queue and retry runs with the same follow-up questions and rubric</td>
+<td>0/2 passed; Joern not rerun</td>
+<td>Recovery guidance could be delivered, but use and overall benefit remained unproven</td>
+</tr>
+<tr>
+<td>Software checks</td>
+<td>134 regression tests across 14 modules</td>
+<td>No live model run</td>
+<td>Final recovery code and MCP compatibility passed the declared checks, with no failures, errors or skips</td>
+</tr>
+</tbody></table>
+</div>
+<p>The initial Joern investigation resolved an ambiguous endpoint with exact node identities,
+executed a flow query, bound the resulting evidence to a note, then reopened the
+exact note and artifact. Its final answer still misstated an argument expression
+and included an out-of-scope function. The evidence lifecycle was explicitly
+requested. No custom query was used, and reliable automatic Joern selection was
+not tested.</p>
+<p>Queue and retry exercised explicit compaction followed by a restart of the same
+persisted session. This is not recovery into an empty new chat or an automatic
+context-pressure test. Review found lost caveats, omitted conditions and
+overgeneralization—for example, stating exactly N+1 sends when early success
+means <strong>up to</strong> N+1.</p>
+<p>Two recovery improvements supplied lossless retry guidance for an unambiguous
+malformed save and exact navigation to notes involved in rejected corrections.
+The repeated queue investigation exercised neither new branch. The retry run received the new
+review navigation but bypassed it, saving corrections with empty structured
+sources and caveats. It did reopen the replacements, an observed improvement
+that does not establish causation. Both complete reviews still failed.</p>
+<p>The final software adjustment handled confidence text that could not safely fit the
+batch schema. Its 134 passing regressions verify software behavior, not improved
+model judgment. The frozen 290-file source archive had SHA-256
+<code>1e216635280b1da35ad5f719fa5431d7514a72f624b94cebbe6d3d8ff01becf5</code>.
+The earlier model outcomes do not measure the effect of that final adjustment.</p>
+<h2 id="what-the-observations-suggest">What the observations suggest</h2>
+<p>The article&#39;s practical suggestions come from the following observations. They
+identify useful review targets; their effectiveness as interventions was not
+established by these trials.</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="What the observations suggest table">
+<table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>What it makes worth examining</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A1 explained the POST/PUT distinction correctly but retained a contradictory note title; R2 fixed a citation in its answer while leaving the note unchanged</td>
+<td>The saved title and details are a separate output from the answer, even when both cite the same source</td>
+</tr>
+<tr>
+<td>The 302 method distinction and the retry case&#39;s early-success condition were lost in saved or reported wording</td>
+<td>A short qualifier can carry the condition that makes a conclusion true</td>
+</tr>
+<tr>
+<td>A selected Joern query returned no replay path, while the local runtime check observed replay</td>
+<td>This static route remained unresolved; the empty result did not establish absence of the observed behavior</td>
+</tr>
+<tr>
+<td>The repeated retry investigation received review guidance but saved corrections with empty structured evidence and caveats</td>
+<td>Delivering a recovery hint and successfully saving a replacement do not establish that the replacement preserved its support</td>
+</tr>
+</tbody></table>
+</div>
+<p>The record shows successful retrieval, persistence and evidence reopening
+alongside unresolved errors in saved conclusions. It does not establish overall
+superiority over ordinary tools, reliable autonomous investigation, or improved
+Qwen accuracy from the final recovery patch.</p>
+
+</article></main>
+<footer><div class="wrap"><a href="empty-post-misleading-note.html">← back to the article</a></div></footer>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A redirect leaves a POST with no body. Following it through Axios reveals another problem: a correct explanation can leave behind a misleading saved note.">
+  <title>An Empty POST and a Misleading Note</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .table-scroll { overflow-x: auto; margin: 1.6rem 0; }
+    table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: .85rem; }
+    th, td { padding: .65rem .8rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    article p, article li { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<header><div class="wrap"><nav><a class="brand" href="../index.html">P3J0T / field notes</a><div class="navlinks"><a href="https://github.com/P3J0T">github</a></div></nav></div></header>
+<main><article class="wrap">
+  <div class="kicker">Code investigation / AI</div>
+  <h1>An Empty POST and a Misleading Note</h1>
+  <p class="meta"><time datetime="2026-09-25">25 Sep 2026</time></p>
+  <p class="lede">How a request lost its body—and a correct explanation lost an important detail.</p>
+
+<p>A small POST upload survives a 307 redirect intact. Change the response to 303 and
+the next request becomes an empty GET. Then a callback changes the method back
+to POST. The destination receives a POST with no body.</p>
+<p>The callback restored the method after the redirect handler had already discarded
+the data. Following that sequence through the code explains the result. It also
+leads to a less obvious problem: Qwen could explain the behavior correctly, then
+save a note that contradicted the source it had just read.</p>
+<h2>Where the body goes</h2>
+<p>The relevant code sits in
+<a href="https://github.com/axios/axios/tree/ed95c083f574e869bfe894866d95a01825f8ff4e">Axios</a>
+and its dependency
+<a href="https://github.com/follow-redirects/follow-redirects/tree/0c23a223067201c368035e82954c11eb2578a33b">follow-redirects</a>.
+The local reproduction uses a tiny upload, <code>hello redirect</code>, over Node HTTP/1.
+The server consumes the whole upload before replying. A redirect received
+halfway through an upload remains a separate question.</p>
+<p>The input stream produces two chunks, <code>hello </code> and <code>redirect</code>, once. After a 307,
+both requests contain all fourteen bytes, although the generator has produced
+only two chunks in total.</p>
+<p>Axios <a href="https://github.com/axios/axios/blob/ed95c083f574e869bfe894866d95a01825f8ff4e/lib/core/dispatchRequest.js#L35-L54">transforms the request data</a>
+before its adapter <a href="https://github.com/axios/axios/blob/ed95c083f574e869bfe894866d95a01825f8ff4e/lib/adapters/http.js#L1046-L1120">selects the transport</a>
+and <a href="https://github.com/axios/axios/blob/ed95c083f574e869bfe894866d95a01825f8ff4e/lib/adapters/http.js#L1425-L1484">pipes the stream into it</a>.
+With redirects enabled, follow-redirects handles the request. Its <code>write</code> method
+<a href="https://github.com/follow-redirects/follow-redirects/blob/0c23a223067201c368035e82954c11eb2578a33b/index.js#L140-L174">keeps each chunk in <code>_requestBodyBuffers</code></a>
+while writing it to the current request. A redirected request can then
+<a href="https://github.com/follow-redirects/follow-redirects/blob/0c23a223067201c368035e82954c11eb2578a33b/index.js#L366-L395">replay those retained chunks</a>.</p>
+<p>That explains how the body travels twice without rewinding the stream. The
+counting <code>transformRequest</code> callback also ran only once in each recorded case,
+including a three-redirect chain: redirects stayed inside the transport.</p>
+<p>What happens to the retained body depends on the method and status:</p>
+<div class="table-scroll" role="region" aria-label="Observed redirect outcomes" tabindex="0">
+<table>
+<thead>
+<tr>
+<th>Initial method</th>
+<th>Redirect</th>
+<th>Final method</th>
+<th>Final body</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td>307</td>
+<td>POST</td>
+<td><code>hello redirect</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td>308</td>
+<td>POST</td>
+<td><code>hello redirect</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td>302</td>
+<td>GET</td>
+<td>empty</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>302</td>
+<td>PUT</td>
+<td><code>hello redirect</code></td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>303</td>
+<td>GET</td>
+<td>empty</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>303, callback restores POST</td>
+<td>POST</td>
+<td>empty</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>307 → 303 → 307</td>
+<td>GET</td>
+<td>empty</td>
+</tr>
+</tbody></table>
+</div>
+<p>The <a href="https://github.com/follow-redirects/follow-redirects/blob/0c23a223067201c368035e82954c11eb2578a33b/index.js#L450-L467">rewrite condition</a>
+applies to POST under 301/302, and to methods other than GET and HEAD under 303.
+It changes the method, clears the body and removes content-related headers.
+The <a href="https://github.com/follow-redirects/follow-redirects/blob/0c23a223067201c368035e82954c11eb2578a33b/index.js#L493-L509">callback runs afterward</a>.
+Changing the method there cannot recover the deleted buffer entries.</p>
+<p>The mixed chain follows the same history: the first 307 replays the body, the
+303 discards it, and the last 307 preserves the resulting empty GET.</p>
+<h2>What the tools showed</h2>
+<p>Once <code>_requestBodyBuffers</code> was identified, exact search located its storage,
+replay and clearing assignments. Broader search offered starting points, with
+some detours: one embedding-and-reranking query put an HTTP/2 helper first for
+this HTTP/1 question. Reading the conditions and assignments completed the picture.</p>
+<p>Joern gave a partial view. In queries selected separately from Qwen&#39;s attempts,
+it found a static candidate path from the initial data parameter to the first
+write argument, but no path to the later replay argument. Both endpoints resolved.
+The body nevertheless replayed in the local request. The empty graph result left
+that route unresolved; the reason for the missing path was not established.</p>
+<p>Qwen&#39;s own Joern attempts used different queries and did not establish the complete
+replay route either. One never reached a flow query after invalid endpoint
+selections. Both still explained the behavior from source inspection.</p>
+<h2>A correct answer, a misleading note</h2>
+<p>One Qwen investigation correctly explained the POST/PUT distinction, then saved
+this title:</p>
+<blockquote>
+<p>POST vs PUT with 302: both change to GET, body dropped.</p>
+</blockquote>
+<p>The details underneath correctly said that PUT remains PUT. The note also linked
+to the actual source condition.</p>
+<p>After a conversation summary, Qwen reopened that source, rejected the claim that
+every method changes to GET, and remembered the deferred early-response question.
+But it declared that the checkpoint needed no correction. The title stayed wrong.</p>
+<p>The source link had done its job. It led back to the right passage. Nothing about
+that made the sentence attached to it true.</p>
+<p>This was not confined to one workflow. A plain-tools checkpoint misleadingly
+implied that transformed data applied only to the first hop. In another run, the
+answer corrected a citation while the saved note kept the old one.</p>
+<p>Across eight Qwen investigations, all eight explained the central behavior
+correctly. There were two runs per toolset, ranging from ordinary search and a
+checkpoint file to structured notes, embeddings, reranking and Joern. None passed
+the broader review of source grounding, scope and saved conclusions. The useful
+answer and the record left behind were separate outcomes. This was a small,
+instructed comparison; the <a href="empty-post-misleading-note-evidence.html#axios-trials">individual results</a>
+show where each run fell short.</p>
+<p>A separate retry exercise exposed the same loss in just two words. Qwen described
+<strong>exactly N+1 sends</strong> where the source allowed <strong>up to N+1</strong>: early success could
+end the loop. Dropping that qualification changed the claim. In a later retry run,
+the model saved revised notes but left their evidence and caveat fields empty.
+The <a href="empty-post-misleading-note-evidence.html#continuity-follow-up">continuity follow-up</a>
+records those separate cases.</p>
+<p>On returning to a note, there are two useful things to check: does the saved title
+still agree with the source condition, and did a correction actually reach the
+stored note? Reading the replacement back is a way to check that. Merely reopening
+the source had already left a contradiction untouched.</p>
+<p>For the empty POST, the detail worth carrying forward is the order of two events:
+the body was cleared, then the callback restored the method. Lose that order,
+and the explanation becomes as confusing as the original behavior.</p>
+<p><em>The <a href="empty-post-misleading-note-evidence.html">evidence companion</a> contains the source
+versions, setup, full results and limits.</em></p>
+</article></main>
+<footer><div class="wrap"><a href="../index.html">← all notes</a></div></footer>
+</body>
+</html>
