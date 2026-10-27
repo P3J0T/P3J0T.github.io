@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A PIN can carry familiar password risks. A short PSA on PIN reuse, trust in apps, visible PIN entry, and where biometrics and passkeys help.">
+  <title>Before You Trust an App With Your PIN — P3J0T / field notes</title>
+  <link rel="canonical" href="https://p3j0t.github.io/posts/before-you-trust-an-app-with-your-pin.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="P3J0T / field notes">
+  <meta property="og:title" content="Before You Trust an App With Your PIN">
+  <meta property="og:description" content="A PIN can carry familiar password risks. A short PSA on PIN reuse, trust in apps, visible PIN entry, and where biometrics and passkeys help.">
+  <meta property="og:url" content="https://p3j0t.github.io/posts/before-you-trust-an-app-with-your-pin.html">
+  <meta property="og:image" content="https://p3j0t.github.io/assets/pin-reuse-psa.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="570">
+  <meta property="og:image:alt" content="Three different app screens showing the same reused PIN: Different apps. Same secret.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Before You Trust an App With Your PIN">
+  <meta name="twitter:description" content="A PIN can carry familiar password risks. A short PSA on PIN reuse, trust in apps, visible PIN entry, and where biometrics and passkeys help.">
+  <meta name="twitter:image" content="https://p3j0t.github.io/assets/pin-reuse-psa.png">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    figure { margin: 36px 0; }
+    figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; }
+    figcaption { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .source { font-size: .86em; }
+    article p { overflow-wrap: anywhere; }
+    @media print {
+      html { color-scheme: light; }
+      body { background: white; color: #20252a; font-size: 11pt; }
+      a { color: #354b00; } strong { color: inherit; }
+      header, footer { display: none; } main { padding: 0; }
+      .meta, .muted, figcaption { color: #505a64; }
+      .lede { color: #303a42; }
+      h2 { break-after: avoid; } figure { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<header><div class="wrap"><nav><a class="brand" href="../index.html">P3J0T / field notes</a><div class="navlinks"><a href="https://github.com/P3J0T">github</a></div></nav></div></header>
+<main><article class="wrap">
+  <div class="kicker">Identity / security awareness</div>
+  <h1>Before You Trust an App With Your PIN</h1>
+  <p class="meta"><time datetime="2026-10-27">27 Oct 2026</time></p>
+  <p class="lede">A PIN can carry familiar password risks, including reuse. A quick login tells you very little about how well an app protects your account.</p>
+
+  <p>It is easy to treat a PIN as something less consequential than a password. A few digits, a quick unlock, almost a habit. Using the same familiar number in another app can feel harmless.</p>
+  <p>But if an app sends that reusable PIN to its server to check it, it is using a numeric password. Guessing, capture and reuse are still part of the risk. Calling it a PIN has not changed that. <a class="source" href="https://pages.nist.gov/800-63-4/sp800-63b.html">[NIST]</a></p>
+  <p>I mean a PIN you keep using here, not a one-time code from a message or authenticator app. That distinction matters.</p>
+
+  <p>An app asking me to create a PIN has not earned my trust just by asking. I still decide whether I need the service and trust it enough to create an account. Choosing a unique PIN avoids reuse; it does not make a questionable service trustworthy. And creating an app PIN is no reason to copy the code that unlocks my phone.</p>
+
+  <h2>Different apps can share the same problem</h2>
+  <p>If I give several services the same PIN, I connect their risks. Exposure in one may give someone a useful secret to try against the others. Extra checks can limit what they do with it, but the secret itself is already out.</p>
+  <p>A different logo on each login screen does not make the underlying secret different.</p>
+
+  <figure id="pin-diagram">
+    <picture>
+      <source media="(max-width: 600px)" srcset="../assets/pin-reuse-psa-mobile.svg">
+      <img src="../assets/pin-reuse-psa.svg" alt="Three different generic app screens display the same six-dot PIN. Different apps can still share the same reused secret.">
+    </picture>
+    <figcaption>Reusing a PIN across services can connect accounts that otherwise have nothing to do with one another.</figcaption>
+  </figure>
+
+  <p>The part I find easy to overlook is how much trust this requires. Every service receiving the PIN has to handle it properly. As a user, I usually cannot see whether it ends up in logs, how it is stored, or what stops repeated guesses. A polished app does not answer those questions.</p>
+  <p>A PIN should not travel over the network in plaintext, where someone observing the traffic could read it. Properly implemented HTTPS protects that connection. The receiving service still handles the secret after decryption, though. Secure transmission does not establish safe storage, and HTTPS alone does not make the service trustworthy. <a class="source" href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html">[OWASP: TLS]</a></p>
+  <p>“We hash it” is not enough reassurance either. Without a unique salt—a random value added when hashing each account’s secret—the same PIN hashed the same way produces the same result. Attackers can reuse their guessing work across stolen records. Salts prevent that shortcut, but even good password hashing cannot turn a short PIN into a long, unpredictable secret. Once the PIN itself is exposed, a salt does not stop someone trying it elsewhere. <a class="source" href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#salting">[OWASP: password storage]</a></p>
+
+  <h2>Someone can simply watch</h2>
+  <p>There is also a much more ordinary risk than a database breach: somebody seeing the digits you enter. In a queue, on a train or at a café, a nearby person or camera may capture your phone’s unlock code.</p>
+  <p>Using the phone’s built-in fingerprint or face unlock in public can reduce how often you expose that code by typing it. That benefit exists even without passkeys. The fallback PIN still matters, and shielding it when you need to enter it remains sensible. <a class="source" href="https://www.police.uk/cp/crime-prevention/personal-safety-how-to-stay-safe/mobile-phone-advice/">[Police.uk]</a></p>
+  <p>This does not make PINs inherently insecure. A PIN checked locally on a well-protected device, with enforced limits on guesses, can be part of strong authentication. Where it is used, what it unlocks and who can observe it all matter.</p>
+
+  <h2>Passkeys change what you share</h2>
+  <p>This is where passkeys offer a meaningful improvement. The service verifies a cryptographic proof instead of receiving a reusable password or PIN. There is no shared login secret for a fake website to collect in the same way. <a class="source" href="https://fidoalliance.org/passkeys/">[FIDO]</a></p>
+  <p>A PIN can still be part of that stronger design. It may unlock the passkey locally on your device, just as a fingerprint or face check can. In that flow, the website receives neither your local PIN nor your biometric data. The familiar prompt is doing a different job.</p>
+  <p>That benefit comes from the authentication design behind the prompt. A fingerprint button on its own does not tell you whether an app uses passkeys, unlocks an existing session, or does something else.</p>
+  <p>Biometrics also have limits. Sensors can be fooled, devices can be compromised, and people need alternatives when a sensor does not work for them. The convenience is useful; it is not a guarantee about the whole account. <a class="source" href="https://pages.nist.gov/800-63-4/sp800-63b.html">[NIST]</a></p>
+
+  <h2>The account has more than one way in</h2>
+  <p>Even a strong sign-in can be undermined elsewhere. Imagine an account protected by a passkey, but recoverable through an email account an attacker already controls. If that recovery route is enough to take ownership, the attacker has no reason to defeat the normal login. <a class="source" href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html">[OWASP: authentication]</a></p>
+  <p>The same applies to adding a new device, keeping a session open, or deciding what a signed-in person can do. Identity and access security depends on how these parts work together, with protection proportionate to what is at stake.</p>
+  <p>People should not have to audit every app before using it. Services are responsible for safeguards their users cannot inspect. But a convenient interface is not a reason to give a reusable PIN less care than a password.</p>
+  <p>Being selective about services, avoiding reused secrets and being careful about visible PIN entry all matter. Passkeys and built-in biometrics can reduce particular risks. A PIN can also be a sound part of the protection. None of these choices removes the need to consider the rest of the account.</p>
+  <p><strong>The label on the login screen should not decide how much trust we give it.</strong></p>
+</article></main>
+<footer><div class="wrap"><a href="../index.html">← all notes</a></div></footer>
+</body>
+</html>

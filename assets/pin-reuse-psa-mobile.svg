@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="900" viewBox="0 0 700 900" role="img" aria-labelledby="title desc">
+  <title id="title">Different apps. Same secret.</title>
+  <desc id="desc">An illustration of PIN reuse across services. Three generic app screens with different symbols repeat the same six-dot PIN entry.</desc>
+  <style>text {font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}</style>
+  <rect width="700" height="900" rx="24" fill="#0b0d10"/>
+  <text x="44" y="57" font-size="25" letter-spacing="3" fill="#d8ff66">PIN REUSE</text>
+  <text x="44" y="122" font-size="52" font-weight="700" letter-spacing="-1" fill="#e7e9ec">Different apps.</text>
+  <text x="44" y="184" font-size="52" font-weight="700" letter-spacing="-1" fill="#e7e9ec">Same secret.</text>
+  <text x="44" y="237" font-size="26" fill="#9aa4af">When a PIN is reused</text>
+  <text x="44" y="272" font-size="26" fill="#9aa4af">across services</text>
+  <g>
+          <rect x="44" y="322" width="612" height="154" rx="20" fill="#11151a" stroke="#303944" stroke-width="2"/>
+          <rect x="74" y="350" width="25" height="25" rx="6" fill="#9aa4af"/><text x="120" y="367" font-size="25" fill="#9aa4af">APP ONE</text>
+          <text x="626" y="367" text-anchor="end" font-size="23" fill="#9aa4af">Enter PIN</text>
+          <circle cx="250.0" cy="438" r="11" fill="#d8ff66"/><circle cx="290.0" cy="438" r="11" fill="#d8ff66"/><circle cx="330.0" cy="438" r="11" fill="#d8ff66"/><circle cx="370.0" cy="438" r="11" fill="#d8ff66"/><circle cx="410.0" cy="438" r="11" fill="#d8ff66"/><circle cx="450.0" cy="438" r="11" fill="#d8ff66"/>
+        </g>
+  <g>
+          <rect x="44" y="496" width="612" height="154" rx="20" fill="#11151a" stroke="#303944" stroke-width="2"/>
+          <circle cx="87" cy="537" r="13" fill="#9aa4af"/><text x="120" y="541" font-size="25" fill="#9aa4af">APP TWO</text>
+          <text x="626" y="541" text-anchor="end" font-size="23" fill="#9aa4af">Enter PIN</text>
+          <circle cx="250.0" cy="612" r="11" fill="#d8ff66"/><circle cx="290.0" cy="612" r="11" fill="#d8ff66"/><circle cx="330.0" cy="612" r="11" fill="#d8ff66"/><circle cx="370.0" cy="612" r="11" fill="#d8ff66"/><circle cx="410.0" cy="612" r="11" fill="#d8ff66"/><circle cx="450.0" cy="612" r="11" fill="#d8ff66"/>
+        </g>
+  <g>
+          <rect x="44" y="670" width="612" height="154" rx="20" fill="#11151a" stroke="#303944" stroke-width="2"/>
+          <path d="M 74 723 L 87 698 L 100 723 Z" fill="#9aa4af"/><text x="120" y="715" font-size="25" fill="#9aa4af">APP THREE</text>
+          <text x="626" y="715" text-anchor="end" font-size="23" fill="#9aa4af">Enter PIN</text>
+          <circle cx="250.0" cy="786" r="11" fill="#d8ff66"/><circle cx="290.0" cy="786" r="11" fill="#d8ff66"/><circle cx="330.0" cy="786" r="11" fill="#d8ff66"/><circle cx="370.0" cy="786" r="11" fill="#d8ff66"/><circle cx="410.0" cy="786" r="11" fill="#d8ff66"/><circle cx="450.0" cy="786" r="11" fill="#d8ff66"/>
+        </g>
+</svg>
